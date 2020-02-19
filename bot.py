@@ -53,10 +53,8 @@ class Bot():
 		#images
 		self.images = []
 		imageDict = self.getJson(lines, "IMAGES")
-		print(imageDict)
 		for image in imageDict:
 			self.images.append(ImagePost(image['path'], image['caption']))
-		print(self.images)
 
 	def getParams(self, lines, header):
 		res = []
@@ -221,8 +219,8 @@ class Bot():
 
 	def getPosterOf(self, postId):
 		self.browser.get('https://www.instagram.com/p/'+postId+'/')
-		WebDriverWait(self.browser, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'h2 a')))
-		poster = self.browser.find_element_by_css_selector('h2 a')
+		WebDriverWait(self.browser, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div a')))
+		poster = self.browser.find_element_by_css_selector('div a')
 		return poster.text
 
 	def setOptions(self, options):

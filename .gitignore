@@ -2,3 +2,4 @@
 /accounts
 *.pyc
 .vscode
+.DS_Store
