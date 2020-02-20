@@ -220,8 +220,8 @@ class Bot():
 	def getPosterOf(self, postId):
 		self.browser.get('https://www.instagram.com/p/'+postId+'/')
 		WebDriverWait(self.browser, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div a')))
-		poster = self.browser.find_element_by_css_selector('div a')
-		return poster.text
+		poster = self.browser.find_elements_by_css_selector('div a')
+		return poster[1].text
 
 	def setOptions(self, options):
 		if 'headless' in options:
