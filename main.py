@@ -141,7 +141,6 @@ class Application(tk.Frame):
 		#unfollow some people we're following
 		ourFollowing = self.bot.getFollowing(self.bot.username)
 		for following in ourFollowing:
-			time.sleep(2)
 			self.bot.unfollowUser(following)
 			numUnfollowed += 1
 			if numUnfollowed >= shouldUnfollow:
@@ -157,7 +156,6 @@ class Application(tk.Frame):
 			followers = self.bot.getFollowersOf(poster)
 			#follow followers of the people that posted the post ^
 			for follower in followers:
-				time.sleep(2)
 				self.bot.followUser(follower)
 				numFollowed += 1
 				if numFollowed >= shouldFollow:

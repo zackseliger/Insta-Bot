@@ -84,6 +84,7 @@ class Bot():
 		
 		#start webdriver
 		self.browser = webdriver.Chrome(options = self.chrome_options)
+		self.browser.implicitly_wait(10)
 
 	def end(self):
 		#close the webdriver
@@ -91,7 +92,6 @@ class Bot():
 
 	def signIn(self):
 		self.browser.get("https://www.instagram.com/accounts/login")
-		WebDriverWait(self.browser, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'form input')))
 
 		if os.path.isfile(self.cookiesPath):
 			self.load_cookies(self.cookiesPath)
@@ -110,16 +110,14 @@ class Bot():
 
 	def getFollowersOf(self, username):
 		self.browser.get("https://www.instagram.com/"+username)
-		WebDriverWait(self.browser, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'ul li a')))
-		followersLink = self.browser.find_element_by_css_selector('ul li a')
 		try:
+			followersLink = self.browser.find_element_by_css_selector('ul li a')
 			followersLink.click()
 		except:
 			print("private account")
 			return []
 
 		#get the list of users there
-		WebDriverWait(self.browser, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'ul div li')))
 		followerDivs = self.browser.find_elements_by_css_selector('ul div li')
 		followers = []
 		for follower in followerDivs:
@@ -131,7 +129,6 @@ class Bot():
 
 	def getFollowing(self, username):
 		self.browser.get("https://www.instagram.com/"+username)
-		WebDriverWait(self.browser, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'ul li a')))
 		links = self.browser.find_elements_by_css_selector('ul li a')
 		try:
 			links[1].click()
@@ -140,7 +137,6 @@ class Bot():
 			return []
 
 		#get the list of users there
-		WebDriverWait(self.browser, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'ul div li')))
 		followingDivs = self.browser.find_elements_by_css_selector('ul div li')
 		followings = []
 		for following in followingDivs:
@@ -152,7 +148,6 @@ class Bot():
 
 	def followUser(self, username):
 		self.browser.get("https://www.instagram.com/"+username)
-		WebDriverWait(self.browser, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'button')))
 
 		#figure out if it's a public or private account
 		buttonIndex = 1
@@ -168,7 +163,6 @@ class Bot():
 
 	def unfollowUser(self, username):
 		self.browser.get("https://www.instagram.com/"+username)
-		WebDriverWait(self.browser, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'button')))
 		unFollowButton = self.browser.find_elements_by_css_selector('button')[2]
 
 		#click unfollow if we're not already unfollowed
@@ -179,7 +173,6 @@ class Bot():
 
 	def postImage(self, path, caption=""):
 		self.browser.get("https://www.instagram.com/"+self.username)
-		WebDriverWait(self.browser, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div div div')))
 		uploadButton = self.browser.find_elements_by_css_selector('div div div[tabindex="0"]')[0]
 
 		#click upload button because instagram makes us, but add an event which cancels the event
@@ -191,7 +184,6 @@ class Bot():
 		input[0].send_keys(path)
 
 		#make sure meme is fullscreen or whatever and hit next
-		WebDriverWait(self.browser, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'button span')))
 		time.sleep(0.1)
 		spans = self.browser.find_elements_by_css_selector('button span')
 		if len(spans) > 1:
@@ -199,14 +191,12 @@ class Bot():
 
 		#hit next, fill out caption, and post
 		self.browser.execute_script('document.getElementsByTagName("button")[1].click();')
-		WebDriverWait(self.browser, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'textarea')))
 		textarea = self.browser.find_element_by_css_selector('textarea')
 		textarea.send_keys(caption)
 		self.browser.execute_script('document.getElementsByTagName("button")[1].click();')
 
 	def getHashtagPosts(self, hashtag):
 		self.browser.get("https://www.instagram.com/explore/tags/"+hashtag)
-		WebDriverWait(self.browser, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a div div img')))
 		links = self.browser.find_elements_by_css_selector('a')
 		res = []
 		for link in links:
@@ -219,7 +209,6 @@ class Bot():
 
 	def getPosterOf(self, postId):
 		self.browser.get('https://www.instagram.com/p/'+postId+'/')
-		WebDriverWait(self.browser, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div a')))
 		poster = self.browser.find_elements_by_css_selector('div a')
 		return poster[1].text
 
