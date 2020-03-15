@@ -151,15 +151,14 @@ class Bot():
 
 		#figure out if it's a public or private account
 		buttonIndex = 1
+		self.browser.implicitly_wait(0)
 		if len(self.browser.find_elements_by_css_selector('span button')) == 0:
 			buttonIndex = 2
 		followButton = self.browser.find_elements_by_css_selector('button')[buttonIndex]#1 if public 2 if private
+		self.browser.implicitly_wait(10)#turn off implicit waits then back on
 		#click follow if we're not already following
-		try:
-			if followButton.value_of_css_property("color") == "rgba(255, 255, 255, 1)":
-				followButton.click()
-		except:
-			print("couldn't follower a user. Skipping...")
+		if followButton.value_of_css_property("color") == "rgba(255, 255, 255, 1)":
+			followButton.click()
 
 	def unfollowUser(self, username):
 		self.browser.get("https://www.instagram.com/"+username)
@@ -178,10 +177,14 @@ class Bot():
 		#click upload button because instagram makes us, but add an event which cancels the event
 		self.browser.execute_script('document.addEventListener("click", function(e) {e.preventDefault();},{once:true});')
 		uploadButton.click()
+		
+		time.sleep(1)
 
 		#puts our file down
 		input = self.browser.find_elements_by_css_selector('input[type="file"]')
 		input[0].send_keys(path)
+		
+		time.sleep(1)
 
 		#make sure meme is fullscreen or whatever and hit next
 		time.sleep(0.1)

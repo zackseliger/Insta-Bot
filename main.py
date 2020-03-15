@@ -179,6 +179,18 @@ class Application(tk.Frame):
 		#re-queue in 'interval' time
 		self.botTimer = Timer(self.bot.options['interval']*3600, self.runBot)
 		self.botTimer.start()
+		
+	def postImage(self):
+		#start bot and wait 2 secs to make sure everything loaded
+		self.bot.start(headless=self.headlessVar.get())
+		self.bot.signIn()
+		time.sleep(2)
+		
+		#post image if there's one in the array
+		if len(self.bot.images) > 0:
+			self.bot.postImage(self.bot.images[0].path, self.bot.images[0].caption)
+			self.bot.images.pop(0)
+			self.updateImageText()
 
 	def startBot(self):
 		self.updateOptions()
