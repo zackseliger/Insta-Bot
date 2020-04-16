@@ -1,5 +1,6 @@
 /__pycache__
 /accounts
+/posts
 *.pyc
 .vscode
 .DS_Store

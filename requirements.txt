@@ -1,0 +1,4 @@
+selenium
+flask
+pillow
+werkzeug

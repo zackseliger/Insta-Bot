@@ -54,7 +54,7 @@ class Bot():
 		self.images = []
 		imageDict = self.getJson(lines, "IMAGES")
 		for image in imageDict:
-			self.images.append(ImagePost(image['path'], image['caption']))
+			self.addPost(image['path'], image['caption'])
 
 	def getParams(self, lines, header):
 		res = []
@@ -169,6 +169,9 @@ class Bot():
 			unFollowButton.click()
 			confirmButton = self.browser.find_elements_by_css_selector('div button')[-2]
 			confirmButton.click()
+
+	def addPost(self, path, caption=""):
+		self.images.append(ImagePost(path, caption))
 
 	def postImage(self, path, caption=""):
 		self.browser.get("https://www.instagram.com/"+self.username)
