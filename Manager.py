@@ -1,32 +1,13 @@
-from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.options import Options
-from ImagePost import ImagePost
-import time
+from InstaBrowser import InstaBrowser
+from Account import Account
 import os
-import pickle
+import random
+from reddit_scraper import save_top_images
 
-class Bot():
+class Manager():
 	def __init__(self):
-		#open up browser as a mobile device
-		self.USER_AGENT = "Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"
-		mobile_emulation = {
-			"deviceMetrics": {
-				"width": 360,
-				"height": 640,
-				"pixelRatio": 3.0
-			},
-			"userAgent": self.USER_AGENT
-		}
-		self.chrome_options = Options()
-		self.chrome_options.add_experimental_option("mobileEmulation", mobile_emulation)
-		self.chrome_options.add_experimental_option("detach", True)
-		self.chrome_options.add_argument("window-size=360,900")
-		
 		self.accounts = []
+		self.browser = InstaBrowser()
 		
 	def addAccount(self, acc):
 		self.accounts.append(acc)
@@ -35,53 +16,74 @@ class Bot():
 	def removeAccount(self, acc):
 		self.accounts.remove(acc)
 
-	def start(self, **kwargs):
-		#keyword arguments
-		for key, value in kwargs.items():
-			if key == "headless" and value:
-				self.chrome_options.add_argument("--headless")
-		
-		#start webdriver
-		self.browser = webdriver.Chrome(options = self.chrome_options)
-		self.browser.implicitly_wait(10)
+	# adds all the accounts it finds in a folder
+	def addAccountsFrom(self, path):
+		files = os.listdir(path)
+		for filename in files:
+			if filename[filename.rfind('.'):] == '.acc':
+				self.addAccount(Account(path+"/"+filename))
 
-	def end(self):
-		#close the webdriver
-		self.browser.quit()
+	# unfollow people according to the account's settings
+	def unfollowUsers(self, account):
+		numUnfollowed = 0
+		followingUs = self.browser.getFollowersOf(account.username)
+		while numUnfollowed < account.options['toUnfollow']:
+			# since 'getFollowersOf' only gets 30 or so users at a time
+			if len(followingUs) == 0:
+				followingUs = self.browser.getFollowersOf(account.username)
+			# unfollow
+			if self.browser.unfollowUser(followingUs.pop(0)) == True:
+				numUnfollowed += 1
 
-	def signIn(self):
-		self.browser.get("https://www.instagram.com/accounts/login")
+	# follow people according to the account's settings
+	def followUsers(self, account):
+		posts = self.browser.getHashtagPosts(random.choice(account.hashtags))
+		peopleToFollow = []
+		numFollowed = 0
+		while numFollowed < account.options['toFollow']:
+			# get a new post if we're out
+			if len(posts) == 0:
+				posts = self.browser.getHashtagPosts(random.choice(account.hashtags))
+			
+			# get a new person's followers if we're out of people to follow
+			while len(peopleToFollow) == 0:
+				post = posts.pop(0)
+				poster = self.browser.getPosterOf(post)
+				peopleToFollow = self.browser.getFollowersOf(poster)
+			
+			# follow
+			person = peopleToFollow.pop(0)
+			self.browser.followUser(person)
 
-		if os.path.isfile(self.cookiesPath):
-			self.load_cookies(self.cookiesPath)
-			self.browser.get("https://www.instagram.com")
-		else:
-			#gets email/password input and inputs username/password
-			emailInput = self.browser.find_elements_by_css_selector('form input')[0]
-			passwordInput = self.browser.find_elements_by_css_selector('form input')[1]
-			emailInput.send_keys(self.username)
-			passwordInput.send_keys(self.password)
-			#press enter
-			passwordInput.send_keys(Keys.ENTER)
-			#wait and save cookies
-			time.sleep(3)
-			self.save_cookies(self.cookiesPath)
+	# post an image if we have any queued
+	def postImage(self, account):
+		if len(account.images) > 0:
+				self.browser.postImage(account, account.images[0].path, account.images[0].caption)
+				image = account.images.pop(0)
+				
+				# delete image file and save to account
+				os.remove(image.path)
+				account.save()
 
-	def deleteCookies(self):
-		try:
-			os.remove(self.cookiesPath)
-		except e:
-			print("couldn't remove cookies")
+	def runAccounts(self):
+		self.browser.start()
+		for account in self.accounts:
+			# sign in
+			self.browser.signIn(account)
 
-	def save_cookies(self, path):
-		self.browser.execute_script('console.log(document.cookie);')
-		with open(path, 'wb') as filehandler:
-			pickle.dump(self.browser.get_cookies(), filehandler)
+			# unfollow uers, follow new users, and post an image
+			self.unfollowUsers(account)
+			self.followUsers(account)
+			self.postImage(account)
+			
+			# save cookies
+			self.browser.save_cookies(account.cookiesPath)
 
-	def load_cookies(self, path):
-		with open(path, 'rb') as cookiesfile:
-			cookies = pickle.load(cookiesfile)
-			for cookie in cookies:
-				if 'expiry' in cookie:
-					del cookie['expiry']
-				self.browser.add_cookie(cookie)
+		# close browser
+		self.browser.end()
+
+
+manager = Manager()
+manager.addAccountsFrom('accounts')
+
+manager.runAccounts()
