@@ -145,6 +145,10 @@ class InstaBrowser():
 		textarea.send_keys(caption)
 		self.browser.execute_script('document.getElementsByTagName("button")[1].click();')
 
+	# given the url of a post, get the id of that post
+	def getPostId(self, postUrl):
+		return postUrl[postUrl.find('/p/')+3:-1]
+
 	# get posts at the hashtag. OCCASIONALLY GETS NON-POSTS
 	def getHashtagPosts(self, hashtag):
 		self.browser.get("https://www.instagram.com/explore/tags/"+hashtag)
@@ -152,7 +156,7 @@ class InstaBrowser():
 		res = []
 		for link in links:
 			if link.get_attribute('href').find('/p/') != -1:
-				res.append(link.get_attribute('href'))
+				res.append(self.getPostId(link.get_attribute('href')))
 		return res
 
 	# gets the username of the poster given a post

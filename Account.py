@@ -34,6 +34,12 @@ class Account():
 		self.options['toFollow'] = int(options[2].split()[0])
 		self.options['toUnfollow'] = int(options[2].split()[1])
 
+		# sources for content
+		self.sources = self.getParams(lines, "SOURCES")
+
+		# haghtags to use with our posts
+		self.postHashtags = self.getParams(lines, "POST_HASHTAGS")
+
 		#images
 		self.images = []
 		imageDict = self.getJson(lines, "IMAGES")
