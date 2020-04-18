@@ -5,6 +5,7 @@ import random
 from reddit_scraper import save_top_images
 from threading import Timer
 import traceback
+from time import sleep
 
 class Manager():
 	def __init__(self):
@@ -79,7 +80,7 @@ class Manager():
 			caption = ""
 			# add 5-8 random hashtags from 'postHashtags' to post
 			if len(account.postHashtags) > 0:
-				caption += "\n-\n"
+				caption += "-\n-\n"
 				random.shuffle(account.postHashtags)
 				numTags = 5+random.random()*4
 				for i in range(int(numTags)):
@@ -88,6 +89,10 @@ class Manager():
 
 			# add post and caption to account
 			account.addPost(filepath, caption)
+
+	def openAccount(self, account):
+		self.browser.start()
+		self.browser.signIn(account)
 
 	def runAccount(self, account) :
 		# start browser and sign in
@@ -98,6 +103,7 @@ class Manager():
 		if len(account.images) == 0:
 			self.getImages(account)
 		self.postImage(account)
+		sleep(10)
 		self.unfollowUsers(account)
 		self.followUsers(account)
 
@@ -141,6 +147,7 @@ def handleAccountQueue(manager):
 	# set timer to add account to queue again
 	if acc is not None:
 		t = Timer(acc.options['interval']*3600, lambda: manager.accountQueue.append(acc))
+		t.start()
 
 	# set timer to call handleAccountQueue again (in 30 seconds)
 	manager.timer = Timer(30, lambda: handleAccountQueue(manager))

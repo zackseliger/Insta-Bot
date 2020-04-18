@@ -91,6 +91,14 @@ class Account():
 		for hashtag in self.hashtags:
 			file.write(hashtag+"\n")
 
+		file.write("\nPOST_HASHTAGS\n")
+		for hashtag in self.postHashtags:
+			file.write(hashtag+"\n")
+
+		file.write("\nSOURCES\n")
+		for source in self.sources:
+			file.write(source+"\n")
+
 		file.write("\nIMAGES\n")
 		#convert all ImagePosts to dictionaries
 		imageDict = []
