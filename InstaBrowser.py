@@ -12,28 +12,17 @@ import pickle
 class InstaBrowser():
 	def __init__(self):
 		#open up browser as a mobile device
-		self.USER_AGENT = "Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"
-		mobile_emulation = {
-			"deviceMetrics": {
-				"width": 360,
-				"height": 640,
-				"pixelRatio": 3.0
-			},
-			"userAgent": self.USER_AGENT
-		}
-		self.chrome_options = Options()
-		self.chrome_options.add_experimental_option("mobileEmulation", mobile_emulation)
-		self.chrome_options.add_experimental_option("detach", True)
-		self.chrome_options.add_argument("window-size=360,900")
+		self.USER_AGENT = "Mozilla/5.0 (Linux; Android 7.0; SM-G892A Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/67.0.3396.87 Mobile Safari/537.36"
+		self.profile = webdriver.FirefoxProfile()
+		self.profile.set_preference("general.useragent.override", self.USER_AGENT)
+		self.options = webdriver.FirefoxOptions()
+		self.options.add_argument("--width=360")
+		self.options.add_argument("--height=640")
 	
 	# create and open the webdriver
-	def start(self, headless=False):
-		# can be headless
-		if headless == True:
-			self.chrome_options.add_argument("--headless")
-		
+	def start(self):
 		#start webdriver
-		self.browser = webdriver.Chrome(options = self.chrome_options)
+		self.browser = webdriver.Firefox(self.profile, firefox_options = self.options)
 		self.browser.implicitly_wait(10)
 
 	# close the webdriver
@@ -80,6 +69,26 @@ class InstaBrowser():
 			except:
 				pass
 		return followings
+
+	# unfollowers users from the account of the logged in user
+	def unfollowUsersFromList(self, username, num):
+		self.browser.get("https://www.instagram.com/"+username)
+		self.browser.execute_script("a=document.getElementsByTagName('a');for(let i=0;i<a.length;i++)if(a[i].href&&a[i].href.indexOf('/following')!==-1)a[i].click();")
+		time.sleep(1)
+		self.browser.execute_script('window.scrollBy(0,250);')
+		time.sleep(1)
+		self.browser.execute_script("(async function(){d=document.getElementsByTagName.bind(document);a=d('button');nu=0;for(let i=0;i<a.length&&nu<"+str(num)+";i++){if(a[i].innerHTML=='Following'){a[i].click();b=d('button');for(let j=b.length-1;j>=0;j--) {if (b[j].innerHTML=='Unfollow'){b[j].click();await new Promise(r=>setTimeout(r,1000));nu++;break;}}}}})();")
+		time.sleep(1)
+	
+	# follow users from the account of the given username
+	def followUsersFromList(self, username, num):
+		self.browser.get("https://www.instagram.com/"+username)
+		self.browser.execute_script("a=document.getElementsByTagName('a');for(let i=0;i<a.length;i++)if(a[i].href&&a[i].href.indexOf('/followers')!==-1)a[i].click();")
+		time.sleep(1)
+		self.browser.execute_script('window.scrollBy(0,250);')
+		time.sleep(1)
+		self.browser.execute_script("(async function(){a=document.getElementsByTagName('button');nu=0;for(let i=0;i<a.length&&nu<"+str(num)+";i++){if(a[i].innerHTML=='Follow'){a[i].click();nu++;await new Promise(r=>setTimeout(r,1000));}}})();")
+		time.sleep(1)
 
 	# follow a user with the given username
 	# returns: True if followed, False if not (non-existent account or already following or something else)
@@ -162,8 +171,8 @@ class InstaBrowser():
 	# gets the username of the poster given a post
 	def getPosterOf(self, postId):
 		self.browser.get('https://www.instagram.com/p/'+postId+'/')
-		poster = self.browser.find_elements_by_css_selector('div a')
-		return poster[1].text
+		posterUrl = self.browser.find_element_by_css_selector('a').get_attribute('href')
+		return posterUrl[posterUrl.find("instagram.com/")+14:-1]
 
 	# sign an account in and save cookies
 	def signIn(self, acc):

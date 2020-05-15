@@ -31,34 +31,28 @@ class Manager():
 	# unfollow people according to the account's settings
 	def unfollowUsers(self, account):
 		numUnfollowed = 0
-		followingUs = self.browser.getFollowersOf(account.username)
-		while numUnfollowed < account.options['toUnfollow']:
-			# since 'getFollowersOf' only gets 30 or so users at a time
-			if len(followingUs) == 0:
-				followingUs = self.browser.getFollowersOf(account.username)
-			# unfollow
-			if self.browser.unfollowUser(followingUs.pop(0)) == True:
-				numUnfollowed += 1
+		self.browser.unfollowUsersFromList(account.username, account.options['toUnfollow'])
 
 	# follow people according to the account's settings
 	def followUsers(self, account):
 		posts = self.browser.getHashtagPosts(random.choice(account.hashtags)) 
 		peopleToFollow = []
 		numFollowed = 0
+		numFollowPerUser = int(account.options['toFollow']/4)
+
 		while numFollowed < account.options['toFollow']:
 			# get a new post if we're out
 			if len(posts) == 0:
 				posts = self.browser.getHashtagPosts(random.choice(account.hashtags))
+				random.shuffle(posts)
 			
-			# get a new person's followers if we're out of people to follow
-			while len(peopleToFollow) == 0:
-				post = posts.pop(0)
-				poster = self.browser.getPosterOf(post)
-				peopleToFollow = self.browser.getFollowersOf(poster)
-			
-			# follow
-			person = peopleToFollow.pop(0)
-			self.browser.followUser(person)
+			# follow 'numFollowPerUser' people from this guy
+			post = posts.pop(0)
+			poster = self.browser.getPosterOf(post)
+			sleep(1)
+			self.browser.followUsersFromList(poster, numFollowPerUser)
+			numFollowed += numFollowPerUser
+			sleep(2)
 
 	# post an image if we have any queued
 	def postImage(self, account):
