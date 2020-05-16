@@ -13,14 +13,14 @@ class InstaBrowser():
 	def __init__(self):
 		#open up browser as a mobile device
 		self.USER_AGENT = "Mozilla/5.0 (Linux; Android 7.0; SM-G892A Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/67.0.3396.87 Mobile Safari/537.36"
-		self.profile = webdriver.FirefoxProfile()
-		self.profile.set_preference("general.useragent.override", self.USER_AGENT)
 		self.options = webdriver.FirefoxOptions()
-		self.options.add_argument("--width=360")
-		self.options.add_argument("--height=640")
+		self.options.add_argument("--width=405")
+		self.options.add_argument("--height=720")
 	
 	# create and open the webdriver
 	def start(self):
+		self.profile = webdriver.FirefoxProfile()
+		self.profile.set_preference("general.useragent.override", self.USER_AGENT)
 		#start webdriver
 		self.browser = webdriver.Firefox(self.profile, firefox_options = self.options)
 		self.browser.implicitly_wait(10)
