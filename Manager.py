@@ -48,9 +48,8 @@ class Manager():
 			
 			# follow 'numFollowPerUser' people from this guy
 			post = posts.pop(0)
-			poster = self.browser.getPosterOf(post)
-			sleep(1)
-			self.browser.followUsersFromList(poster, numFollowPerUser)
+			# sleep(1)
+			self.browser.followUsersFromLikeList(post, numFollowPerUser)
 			numFollowed += numFollowPerUser
 			sleep(2)
 

@@ -1,9 +1,13 @@
 import os
-from bot import Bot
+from Account import Account
 from PIL import Image
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, request, jsonify
 from werkzeug.utils import secure_filename
+# runs account manager stuff
+from Manager import Manager
+from InstaBrowser import InstaBrowser
 app = Flask(__name__)
+# return render_template('home.html')
 
 @app.route('/')
 def root():
@@ -15,11 +19,11 @@ def getAccounts():
 	account_files = []
 	for filename in files:
 		if ".acc" in filename:
-			bot = Bot("accounts/"+filename)
-			account_files.append(bot.__dict__)
+			acc = Account("accounts/"+filename)
+			account_files.append(acc.__dict__)
 			#serialize image posts
 			images = []
-			for image in bot.images:
+			for image in acc.images:
 				images.append(image.__dict__)
 			account_files[-1]['images'] = images
 	return jsonify(account_files)
@@ -37,7 +41,7 @@ def addAccount():
 	if os.path.exists("accounts/"+args['username']+".acc"):
 		return "Account already exists"
 
-	#make the bot .acc file
+	#make the .acc file
 	file_data = "ACCOUNT\n"+args['username']+"\n"+args['password']+"\n\n"
 	file_data += "OPTIONS\n0\n"+str(args['follow'])+" "+str(args['unfollow'])+"\n\n"
 	if args.get('hashtag') is not None:
@@ -69,7 +73,7 @@ def addPost():
 	if bot_name is None:
 		return "username is a required field"
 	try:
-		bot = Bot("accounts/"+bot_name+".acc")
+		bot = Account("accounts/"+bot_name+".acc")
 	except:
 		return "account with that username does not exist"
 
@@ -77,3 +81,14 @@ def addPost():
 	bot.addPost(os.getcwd()+"/posts/"+secure_filename(img.filename), caption)
 	bot.save()
 	return "ok"
+
+# create manager and add accounts
+manager = Manager()
+manager.addAccountsFrom('accounts')
+
+# run accounts
+manager.runAccounts()
+
+# start the flask app
+if __name__ == '__main__':
+	app.run()

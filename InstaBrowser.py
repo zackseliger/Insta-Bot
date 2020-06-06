@@ -78,17 +78,28 @@ class InstaBrowser():
 		self.browser.execute_script('window.scrollBy(0,250);')
 		time.sleep(1)
 		self.browser.execute_script("(async function(){d=document.getElementsByTagName.bind(document);a=d('button');nu=0;for(let i=0;i<a.length&&nu<"+str(num)+";i++){if(a[i].innerHTML=='Following'){a[i].click();b=d('button');for(let j=b.length-1;j>=0;j--) {if (b[j].innerHTML=='Unfollow'){b[j].click();await new Promise(r=>setTimeout(r,1000));nu++;break;}}}}})();")
-		time.sleep(1)
+		time.sleep(num+1)
 	
 	# follow users from the account of the given username
 	def followUsersFromList(self, username, num):
 		self.browser.get("https://www.instagram.com/"+username)
+		time.sleep(1.2)
 		self.browser.execute_script("a=document.getElementsByTagName('a');for(let i=0;i<a.length;i++)if(a[i].href&&a[i].href.indexOf('/followers')!==-1)a[i].click();")
 		time.sleep(1)
 		self.browser.execute_script('window.scrollBy(0,250);')
 		time.sleep(1)
-		self.browser.execute_script("(async function(){a=document.getElementsByTagName('button');nu=0;for(let i=0;i<a.length&&nu<"+str(num)+";i++){if(a[i].innerHTML=='Follow'){a[i].click();nu++;await new Promise(r=>setTimeout(r,1000));}}})();")
-		time.sleep(1)
+		self.browser.execute_script("(async function(){c=document.getElementsByTagName('a');for(let i=0;i<c.length;i++){if(c[i].innerHTML=='See All Followers'){c[i].click();await new Promise(r=>setTimeout(r,1000));break;}}a=document.getElementsByTagName('button');nu=0;for(let i=0;i<a.length&&nu<"+str(num)+";i++){if(a[i].innerHTML=='Follow'){a[i].click();nu++;await new Promise(r=>setTimeout(r,1000));}}})();")
+		time.sleep(num+3)
+
+	# follow users from the list of people that liked a post
+	def followUsersFromLikeList(self, post, num):
+		self.browser.get('https://www.instagram.com/p/'+post+'/')
+		time.sleep(3)
+		self.browser.execute_script("(async function(){a=document.getElementsByTagName('a');for(let i=0;i<a.length;i++){if(a[i].innerHTML.indexOf('others')!==-1||a[i].innerHTML.indexOf('likes')!==-1){a[i].click();break;}}await new Promise(r=>setTimeout(r,2000));a=document.getElementsByTagName('button');nu=0;for(let i=0;i<a.length&&nu<"+str(num)+";i++){if(a[i].innerHTML=='Follow'){a[i].click();nu++;await new Promise(r=>setTimeout(r,1000));}}})()")
+		time.sleep(num+4)
+
+	# LIKE POSTS ON THE TL
+	#(async function(){num=0;b=document.getElementsByTagName('img');for (i = 0; i < b.length&&num<10; i++) {if (b[i].height/document.body.clientHeight > 0.49){window.scrollBy(0,b[i].getBoundingClientRect().top);await new Promise(r=>setTimeout(r,500+Math.random()*500));a=document.getElementsByTagName('button');for (j = 0; j < a.length; j++) {if (a[j].getBoundingClientRect().top>50){a[j].click();num++;break;}}await new Promise(r=>setTimeout(r,1000));}}})();
 
 	# follow a user with the given username
 	# returns: True if followed, False if not (non-existent account or already following or something else)
@@ -171,6 +182,7 @@ class InstaBrowser():
 	# gets the username of the poster given a post
 	def getPosterOf(self, postId):
 		self.browser.get('https://www.instagram.com/p/'+postId+'/')
+		time.sleep(1)
 		posterUrl = self.browser.find_element_by_css_selector('a').get_attribute('href')
 		return posterUrl[posterUrl.find("instagram.com/")+14:-1]
 

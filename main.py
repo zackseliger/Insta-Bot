@@ -6,6 +6,6 @@ manager = Manager()
 manager.addAccountsFrom('accounts')
 
 # run accounts
-manager.runAccounts()
+# manager.runAccounts()
 
-# manager.openAccount(manager.accounts[0])
+manager.openAccount(manager.accounts[0])
