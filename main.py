@@ -8,4 +8,4 @@ manager.addAccountsFrom('accounts')
 # run accounts
 # manager.runAccounts()
 
-manager.openAccount(manager.accounts[0])
+manager.openAccount(manager.accounts[1])

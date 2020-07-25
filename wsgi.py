@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def root():
-	return "insta"
+	return render_template('index.html', accounts=manager.accounts)
 	
 @app.route('/accounts/get')
 def getAccounts():
@@ -82,13 +82,14 @@ def addPost():
 	bot.save()
 	return "ok"
 
-# create manager and add accounts
-manager = Manager()
-manager.addAccountsFrom('accounts')
-
-# run accounts
-manager.runAccounts()
-
 # start the flask app
 if __name__ == '__main__':
+	# create manager and add accounts
+	manager = Manager()
+	manager.addAccountsFrom('accounts')
+
+	# run accounts
+	manager.runAccounts()
+
+	# run website
 	app.run()

@@ -30,9 +30,10 @@ class Account():
 		#general options
 		options = self.getParams(lines, "OPTIONS")
 		self.options = {}
-		self.options['interval'] = float(options[1])
-		self.options['toFollow'] = int(options[2].split()[0])
-		self.options['toUnfollow'] = int(options[2].split()[1])
+		if len(options) > 0:
+			self.options['interval'] = float(options[1])
+			self.options['toFollow'] = int(options[2].split()[0])
+			self.options['toUnfollow'] = int(options[2].split()[1])
 
 		# sources for content
 		self.sources = self.getParams(lines, "SOURCES")
